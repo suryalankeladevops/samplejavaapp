@@ -5,7 +5,7 @@ pipeline {
 	         steps {
                 // step1 
                 echo 'compiling..'
-		            git url: 'https://github.com/lerndevops/samplejavaapp'
+		            git url: 'https://github.com/lernwithshubh/samplejavaapp'
 		            sh script: '/opt/maven/bin/mvn compile'
            }
         }
@@ -34,20 +34,15 @@ pipeline {
             }			
         }
         stage('codecoverage') {
-
-           tools {
-              jdk 'java1.8'
-           }
-	         steps {
-                // step4
-                echo 'codecoverage..'
-		            sh script: '/opt/maven/bin/mvn cobertura:cobertura -Dcobertura.report.format=xml'
-           }
-	         post {
+	   steps {
+                echo 'unittest..'
+	        sh script: '/opt/maven/bin/mvn verify'
+                 }
+	   post {
                success {
-	               cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'target/site/cobertura/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false                  
+                   jacoco buildOverBuild: true, deltaBranchCoverage: '20', deltaClassCoverage: '20', deltaComplexityCoverage: '20', deltaInstructionCoverage: '20', deltaLineCoverage: '20', deltaMethodCoverage: '20'
                }
-           }		
+           }			
         }
         stage('package/build-war') {
 	         steps {
@@ -60,14 +55,14 @@ pipeline {
 	         steps {
               withDockerRegistry(credentialsId: 'DOCKER_HUB_LOGIN', url: 'https://index.docker.io/v1/') {
                     sh script: 'cd  $WORKSPACE'
-                    sh script: 'docker build --file Dockerfile --tag docker.io/lerndevops/samplejavaapp:$BUILD_NUMBER .'
-                    sh script: 'docker push docker.io/lerndevops/samplejavaapp:$BUILD_NUMBER'
+                    sh script: 'docker build --file Dockerfile --tag docker.io/08170007/samplejavaapp:$BUILD_NUMBER .'
+                    sh script: 'docker push docker.io/08170007/samplejavaapp:$BUILD_NUMBER'
               }	
            }		
         }
         stage('deploy-QA') {
 	         steps {
-                    sh script: 'sudo ansible-playbook --inventory /tmp/myinv $WORKSPACE/deploy/deploy-kube.yml --extra-vars "env=qa build=$BUILD_NUMBER"'
+                    sh script: 'ansible-playbook --inventory /tmp/inv $WORKSPACE/deploy/deploy-kube.yml --extra-vars "env=qa build=$BUILD_NUMBER"'
            }		
         }
     }

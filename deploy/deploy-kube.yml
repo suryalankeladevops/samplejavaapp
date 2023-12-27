@@ -25,6 +25,6 @@
       shell: kubectl scale deploy sampleapp --replicas=2
       
     #- name: deploy app
-    #  shell: kubectl create deployment sampleapp --image=suryalankeladevops/samplejavaapp:{{ build }}
+    #  shell: kubectl create deployment sampleapp --image=lerndevops/samplejavaapp:{{ build }}
     #- name: deploy service
     #  shell: kubectl expose deployment sampleapp --name sampleapp --type NodePort --port 80 --target-port 8080
